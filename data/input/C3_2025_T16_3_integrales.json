@@ -1,0 +1,107 @@
+[
+  {
+    "id": "1",
+    "f": "x**2 + 3*y**2",
+    "int1": { "var": "y", "low": "1", "up": "2" },
+    "int2": { "var": "x", "low": "0", "up": "2" },
+    "int3": null
+  },
+  {
+    "id": "2",
+    "f": "6 - 2*x - 3*y",
+    "int1": { "var": "y", "low": "0", "up": "1/2" },
+    "int2": { "var": "x", "low": "0", "up": "3/2" },
+    "int3": null
+  },
+  {
+    "id": "3",
+    "f": "x*y",
+    "int1": { "var": "y", "low": "x**2", "up": "1" },
+    "int2": { "var": "x", "low": "0", "up": "1" },
+    "int3": null
+  },
+  {
+    "id": "4",
+    "f": "r",
+    "int1": { "var": "z", "low": "0", "up": "6 - 2*r*cos(theta) - 3*r*sin(theta)" },
+    "int2": { "var": "r", "low": "0", "up": "1" },
+    "int3": { "var": "theta", "low": "0", "up": "2*pi" }
+  },
+  {
+    "id": "5",
+	"f": "r",
+	"int1": { "var": "z", "low": "0", "up": "r*sin(theta)" },
+	"int2": { "var": "r", "low": "0", "up": "2" },
+	"int3": { "var": "theta", "low": "0", "up": "pi" }
+  },
+  {
+    "id": "6",
+    "f": "1",
+    "int1": { "var": "z", "low": "0", "up": "sqrt(16 - x**2)" },
+    "int2": { "var": "y", "low": "0", "up": "sqrt(16 - x**2)" },
+    "int3": { "var": "x", "low": "0", "up": "4" }
+  },
+  {
+    "id": "7a",
+    "f": "x*cos(y)",
+    "int1": { "var": "y", "low": "0", "up": "x**2" },
+    "int2": { "var": "x", "low": "0", "up": "1" },
+    "int3": null
+  },
+  {
+    "id": "7b",
+    "f": "exp(x + y)",
+    "int1": { "var": "y", "low": "0", "up": "x" },
+    "int2": { "var": "x", "low": "0", "up": "1" },
+    "int3": null
+  },
+  {
+    "id": "7c",
+    "f": "y*exp(x)",
+    "int1": { "var": "x", "low": "1/2*y", "up": "-y + 6" },
+    "int2": { "var": "y", "low": "0", "up": "4" },
+    "int3": null
+  },
+  {
+    "id": "8",
+    "f": "x**2 + x*y",
+    "int1": { "var": "y", "low": "0", "up": "4" },
+    "int2": { "var": "x", "low": "0", "up": "3" },
+    "int3": null
+  },
+  {
+    "id": "9a",
+    "f": "(1 + x*y)**2",
+    "int1": { "var": "x", "low": "0", "up": "1" },
+    "int2": { "var": "y", "low": "0", "up": "2" },
+    "int3": null
+  },
+  {
+    "id": "9b",
+    "f": "y / x",
+    "int1": { "var": "x", "low": "1", "up": "y" },
+    "int2": { "var": "y", "low": "1", "up": "E" },
+    "int3": null
+  },
+  {
+    "id": "9c",
+    "f": "(x + y)**2",
+    "int1": { "var": "x", "low": "0", "up": "y" },
+    "int2": { "var": "y", "low": "-1", "up": "1" },
+    "int3": null
+  },
+  {
+    "id": "9d",
+    "f": "6*exp(x + 2*y)",
+    "int1": { "var": "y", "low": "0", "up": "x" },
+    "int2": { "var": "x", "low": "1", "up": "log(3)" },
+    "int3": null
+  },
+  {
+    "id": "9e",
+    "f": "x",
+    "int1": { "var": "y", "low": "x**2", "up": "sqrt(20 - x**2)" },
+    "int2": { "var": "x", "low": "0", "up": "2" },
+    "int3": null
+  }
+]
