@@ -1,107 +1,165 @@
-[
-  {
-    "id": "1",
-    "f": "x**2 + 3*y**2",
-    "int1": { "var": "y", "low": "1", "up": "2" },
-    "int2": { "var": "x", "low": "0", "up": "2" },
-    "int3": null
+{
+  "metadata": {
+    "course": {
+      "name": "Calculo 3",
+      "subject_area": "calculo",
+      "level": 3
+    },
+    "assignment": {
+      "type": "TAREA",
+      "number": 16,
+      "year": 2025,
+      "month": 6,
+      "iteration": 1
+    },
+    "output_settings": {
+      "units": "u",
+      "decimal_precision": 4,
+      "show_steps": false,
+      "equation_format": {
+        "show_quantity_label": true,
+        "show_equation": true
+      }
+    }
   },
-  {
-    "id": "2",
-    "f": "6 - 2*x - 3*y",
-    "int1": { "var": "y", "low": "0", "up": "1/2" },
-    "int2": { "var": "x", "low": "0", "up": "3/2" },
-    "int3": null
-  },
-  {
-    "id": "3",
-    "f": "x*y",
-    "int1": { "var": "y", "low": "x**2", "up": "1" },
-    "int2": { "var": "x", "low": "0", "up": "1" },
-    "int3": null
-  },
-  {
-    "id": "4",
-    "f": "r",
-    "int1": { "var": "z", "low": "0", "up": "6 - 2*r*cos(theta) - 3*r*sin(theta)" },
-    "int2": { "var": "r", "low": "0", "up": "1" },
-    "int3": { "var": "theta", "low": "0", "up": "2*pi" }
-  },
-  {
-    "id": "5",
-	"f": "r",
-	"int1": { "var": "z", "low": "0", "up": "r*sin(theta)" },
-	"int2": { "var": "r", "low": "0", "up": "2" },
-	"int3": { "var": "theta", "low": "0", "up": "pi" }
-  },
-  {
-    "id": "6",
-    "f": "1",
-    "int1": { "var": "z", "low": "0", "up": "sqrt(16 - x**2)" },
-    "int2": { "var": "y", "low": "0", "up": "sqrt(16 - x**2)" },
-    "int3": { "var": "x", "low": "0", "up": "4" }
-  },
-  {
-    "id": "7a",
-    "f": "x*cos(y)",
-    "int1": { "var": "y", "low": "0", "up": "x**2" },
-    "int2": { "var": "x", "low": "0", "up": "1" },
-    "int3": null
-  },
-  {
-    "id": "7b",
-    "f": "exp(x + y)",
-    "int1": { "var": "y", "low": "0", "up": "x" },
-    "int2": { "var": "x", "low": "0", "up": "1" },
-    "int3": null
-  },
-  {
-    "id": "7c",
-    "f": "y*exp(x)",
-    "int1": { "var": "x", "low": "1/2*y", "up": "-y + 6" },
-    "int2": { "var": "y", "low": "0", "up": "4" },
-    "int3": null
-  },
-  {
-    "id": "8",
-    "f": "x**2 + x*y",
-    "int1": { "var": "y", "low": "0", "up": "4" },
-    "int2": { "var": "x", "low": "0", "up": "3" },
-    "int3": null
-  },
-  {
-    "id": "9a",
-    "f": "(1 + x*y)**2",
-    "int1": { "var": "x", "low": "0", "up": "1" },
-    "int2": { "var": "y", "low": "0", "up": "2" },
-    "int3": null
-  },
-  {
-    "id": "9b",
-    "f": "y / x",
-    "int1": { "var": "x", "low": "1", "up": "y" },
-    "int2": { "var": "y", "low": "1", "up": "E" },
-    "int3": null
-  },
-  {
-    "id": "9c",
-    "f": "(x + y)**2",
-    "int1": { "var": "x", "low": "0", "up": "y" },
-    "int2": { "var": "y", "low": "-1", "up": "1" },
-    "int3": null
-  },
-  {
-    "id": "9d",
-    "f": "6*exp(x + 2*y)",
-    "int1": { "var": "y", "low": "0", "up": "x" },
-    "int2": { "var": "x", "low": "1", "up": "log(3)" },
-    "int3": null
-  },
-  {
-    "id": "9e",
-    "f": "x",
-    "int1": { "var": "y", "low": "x**2", "up": "sqrt(20 - x**2)" },
-    "int2": { "var": "x", "low": "0", "up": "2" },
-    "int3": null
-  }
-]
+  "exercises": [
+    {
+      "id": "1",
+      "type": "integral",
+      "function": "x**2 + 3*y**2",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "1", "upper": "2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "2",
+      "type": "integral",
+      "function": "6 - 2*x - 3*y",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "1/2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "3/2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "3",
+      "type": "integral",
+      "function": "x*y",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "x**2", "upper": "1" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "4",
+      "type": "integral",
+      "function": "r",
+      "integrals": [
+        { "var": "z", "limits": { "lower": "0", "upper": "6 - 2*r*cos(theta) - 3*r*sin(theta)" }, "order": 1 },
+        { "var": "r", "limits": { "lower": "0", "upper": "1" }, "order": 2 },
+        { "var": "theta", "limits": { "lower": "0", "upper": "2*pi" }, "order": 3 }
+      ]
+    },
+    {
+      "id": "5",
+      "type": "integral",
+      "function": "r",
+      "integrals": [
+        { "var": "z", "limits": { "lower": "0", "upper": "r*sin(theta)" }, "order": 1 },
+        { "var": "r", "limits": { "lower": "0", "upper": "2" }, "order": 2 },
+        { "var": "theta", "limits": { "lower": "0", "upper": "pi" }, "order": 3 }
+      ]
+    },
+    {
+      "id": "6",
+      "type": "integral",
+      "function": "1",
+      "integrals": [
+        { "var": "z", "limits": { "lower": "0", "upper": "sqrt(16 - x**2)" }, "order": 1 },
+        { "var": "y", "limits": { "lower": "0", "upper": "sqrt(16 - x**2)" }, "order": 2 },
+        { "var": "x", "limits": { "lower": "0", "upper": "4" }, "order": 3 }
+      ]
+    },
+    {
+      "id": "7a",
+      "type": "integral",
+      "function": "x*cos(y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "x**2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "7b",
+      "type": "integral",
+      "function": "exp(x + y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "x" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "7c",
+      "type": "integral",
+      "function": "y*exp(x)",
+      "integrals": [
+        { "var": "x", "limits": { "lower": "1/2*y", "upper": "-y + 6" }, "order": 1 },
+        { "var": "y", "limits": { "lower": "0", "upper": "4" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "8",
+      "type": "integral",
+      "function": "x**2 + x*y",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "4" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "3" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "9a",
+      "type": "integral",
+      "function": "(1 + x*y)**2",
+      "integrals": [
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 1 },
+        { "var": "y", "limits": { "lower": "0", "upper": "2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "9b",
+      "type": "integral",
+      "function": "y / x",
+      "integrals": [
+        { "var": "x", "limits": { "lower": "1", "upper": "y" }, "order": 1 },
+        { "var": "y", "limits": { "lower": "1", "upper": "E" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "9c",
+      "type": "integral",
+      "function": "(x + y)**2",
+      "integrals": [
+        { "var": "x", "limits": { "lower": "0", "upper": "y" }, "order": 1 },
+        { "var": "y", "limits": { "lower": "-1", "upper": "1" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "9d",
+      "type": "integral",
+      "function": "6*exp(x + 2*y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "x" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "1", "upper": "log(3)" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "9e",
+      "type": "integral",
+      "function": "x",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "x**2", "upper": "sqrt(20 - x**2)" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "2" }, "order": 2 }
+      ]
+    }
+  ]
+}

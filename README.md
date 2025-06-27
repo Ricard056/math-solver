@@ -1,19 +1,11 @@
-
 ```
-math_solver
+math-solver
 ├─ config
 ├─ data
-│  ├─ input
-│  │  └─ C3_2025_T16_3_integrales.json
-│  ├─ output
-│  ├─ temp
-│  │  └─ C3_2025_T20_3_integrales_vBackUPdeBorrador__CLAUDE.json
-│  └─ TEMP__NO_USAR
-│     ├─ C3_2025_T16_3_integrales.json
-│     ├─ C3_2025_T17_3_integrales.json
-│     ├─ C3_2025_T19_3_integrales.json
-│     ├─ C3_2025_T20_3_integrales.json
-│     └─ C3_2025_T21_3_integrales.json
+│  └─ input
+│     └─ C3_2025_T16_3_integrales.json
+├─ GitWorkflow.md
+├─ LICENSE
 ├─ README.md
 ├─ requirements.txt
 ├─ src
