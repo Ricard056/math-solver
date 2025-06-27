@@ -1,113 +1,167 @@
-Git Workflow - Guía de Comandos
+# Git Workflow - Command Guide
 
-# # 🔄 Workflow Básico (Crear Checkpoints)
+## 🔄 Basic Workflow (Creating Checkpoints)
 
-# # Template Rápido - Copiar y Pegar <---------
+### Quick Template - Copy and Paste <-----------
+```
 git add .
-git commit -m "CAMBIAR_ESTE_MENSAJE"
+git commit -m "CHANGE_THIS_MESSAGE"
 git push
+```
 
-# # Paso a Paso Detallado
-# 1. Ver estado actual
+### Step by Step Details
+1. Check current status
+```
 git status
+```
 
-# 2. Agregar cambios
-git add .                    # Todos los archivos
-git add src/main.py         # Solo un archivo específico
-git add src/                # Solo una carpeta
+2. Add changes
+```
+git add .                    # All files
+git add src/main.py         # Only a specific file
+git add src/                # Only a folder
+```
 
-# 3. Crear commit (checkpoint)
-git commit -m "Descripción del cambio"
+3. Create commit (checkpoint)
+```
+git commit -m "Change description"
+```
 
-# 4. Subir a GitHub
+4. Upload to GitHub
+```
 git push
+```
 
-# # 📝 Ejemplos de Mensajes de Commit
-git commit -m "Agregar función de suma"
-git commit -m "Corregir bug en división por cero"
-git commit -m "Refactorizar código de entrada"
-git commit -m "Agregar validación de inputs"
-git commit -m "Mejorar interfaz de usuario"
-git commit -m "Documentar funciones principales"
+## 📝 Commit Message Examples
+```
+git commit -m "Add sum function"
+git commit -m "Fix division by zero bug"
+git commit -m "Refactor input code"
+git commit -m "Add input validation"
+git commit -m "Improve user interface"
+git commit -m "Document main functions"
+```
 
-# # ⏮️ Regresar a Checkpoints Anteriores
-Ver historial de commits
-git log --oneline           # Ver lista corta
-git log                     # Ver lista detallada
+## ⏮️ Going Back to Previous Checkpoints
+View commit history
+```
+git log --oneline           # Short list view
+git log                     # Detailed list view
+```
 
-# Regresar temporalmente (para revisar)
-git checkout COMMIT_HASH    # Ejemplo: git checkout a1b2c3d
-git checkout main           # Regresar al último commit
+Go back temporarily (for review)
+```
+git checkout COMMIT_HASH    # Example: git checkout a1b2c3d
+git checkout main           # Return to latest commit
+```
 
-# # Regresar permanentemente (¡CUIDADO!)
-# Opción 1: Crear nuevo commit que deshace cambios
+Go back permanently (CAREFUL!)
+Option 1: Create new commit that undoes changes
+```
 git revert COMMIT_HASH
+```
 
-# Opción 2: Eliminar commits (PELIGROSO)
+Option 2: Delete commits (DANGEROUS)
+```
 git reset --hard COMMIT_HASH
 git push --force
+```
 
-# # 🔍 Comandos de VERIFICACION <---------
-# Al abrir VSCode (opcional)
-git status              # Estado actual
-git log --oneline       # Últimos commits
-git branch             # Rama actual
-# Para ver diferencias
-git diff               # Cambios no guardados
-git diff --staged      # Cambios en staging
-git show              # Último commit
+## 🔍 VERIFICATION Commands <-----------
+When opening VSCode (optional)
+```
+git status              # Current status
+git log --oneline       # Recent commits
+git branch             # Current branch
+```
 
-# # 🌿 Trabajo con Ramas (Branches)
-# Crear nueva rama para experimentar
-git branch nueva-feature      # Crear rama
-git checkout nueva-feature    # Cambiar a la rama
-# O hacer ambos en uno:
-git checkout -b nueva-feature
-# Cambiar entre ramas
-git checkout main             # Ir a main
-git checkout nueva-feature    # Ir a feature
-# Fusionar rama con main
+To see differences
+```
+git diff               # Unsaved changes
+git diff --staged      # Changes in staging
+git show              # Last commit
+```
+
+## 🌿 Working with Branches
+Create new branch for experimentation
+```
+git branch new-feature      # Create branch
+git checkout new-feature    # Switch to branch
+```
+
+Or do both at once:
+```
+git checkout -b new-feature
+```
+
+Switch between branches
+```
+git checkout main             # Go to main
+git checkout new-feature    # Go to feature
+```
+
+Merge branch with main
+```
 git checkout main
-git merge nueva-feature
+git merge new-feature
 git push
+```
 
-# # 🆘 Comandos de Emergencia
-# Si cometiste un error antes del commit
-git restore archivo.py      # Deshacer cambios en un archivo
-git restore .              # Deshacer todos los cambios
-# Si cometiste un error después del add
-git reset archivo.py       # Quitar archivo del staging
-git reset                 # Quitar todos del staging
-# Si necesitas hacer cambios al último commit
+## 🆘 Emergency Commands
+If you made a mistake before commit
+```
+git restore file.py      # Undo changes in a file
+git restore .           # Undo all changes
+```
+
+If you made a mistake after add
+```
+git reset file.py       # Remove file from staging
+git reset              # Remove all from staging
+```
+
+If you need to make changes to the last commit
+```
 git add .
-git commit --amend -m "Mensaje corregido"
+git commit --amend -m "Corrected message"
+```
 
-# # 📊 Comandos Útiles Adicionales
-# Ver archivos ignorados
+## 📊 Additional Useful Commands
+View ignored files
+```
 cat .gitignore
+```
 
-# Ver configuración actual
+View current configuration
+```
 git config --list
+```
 
-# Ver remotos configurados
+View configured remotes
+```
 git remote -v
+```
 
-# Verificar conexión con GitHub
+Verify connection with GitHub
+```
 git remote show origin
+```
 
-# # 🎯 Flujo Recomendado para Proyectos <---------
-# 1. Antes de programar: git status (verificar estado)
-# 2. Mientras programas: Guarda frecuentemente (Ctrl+S)
-# 3. Cada feature completada:
+## 🎯 Recommended Project Workflow <-----------
+1. Before programming: `git status` (check status)
+2. While programming: Save frequently (Ctrl+S)
+3. Each completed feature:
+```
 git add .
-git commit -m "Descripción clara"
+git commit -m "Clear description"
 git push
+```
 
-# Al final del día: Siempre hacer push de los commits pendientes
+At end of day: Always push pending commits
 
-# # ⚠️ Notas Importantes
+## ⚠️ Important Notes
 
-# Siempre hacer commit antes de experimentos grandes
-# Mensajes de commit claros y descriptivos
-# Hacer push regularmente para no perder trabajo
-# No usar git reset --hard a menos que estés 100% seguro
+- Always commit before big experiments
+- Clear and descriptive commit messages
+- Push regularly to avoid losing work
+- Don't use `git reset --hard` unless you're 100% sure
