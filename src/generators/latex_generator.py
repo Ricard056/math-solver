@@ -200,7 +200,80 @@ class LaTeXGenerator:
             # Exercise without letter  
             latex += f"    \\item[] "
         
-        # Add solution
+        # Show quantity label if enabled
+        if settings.get('show_quantity_label', False) and solution.get('quantity_type'):
+            quantity_type = solution['quantity_type']
+            # Convert to single letter format
+            if quantity_type == 'Area':
+                latex += "A = "
+            elif quantity_type == 'Volume':
+                latex += "V = "
+            elif quantity_type == 'Mass':
+                latex += "M = "
+        
+        # Show integral equation if enabled and available
+        if settings.get('show_equation', False):
+            integral_latex = self._get_integral_latex(group)
+            if integral_latex:
+                latex += f"$\\displaystyle {integral_latex} = "
+                
+                # Add exact solution if available
+                if solution.get('exact'):
+                    exact_str = str(solution['exact'])
+                    if '/' in exact_str:
+                        parts = exact_str.split('/')
+                        if len(parts) == 2:
+                            numerator = self._format_mathematical_expression(parts[0])
+                            denominator = self._format_mathematical_expression(parts[1])
+                            latex += f"\\dfrac{{{numerator}}}{{{denominator}}}"
+                        else:
+                            formatted_exact = self._format_mathematical_expression(exact_str)
+                            latex += formatted_exact
+                    else:
+                        formatted_exact = self._format_mathematical_expression(exact_str)
+                        latex += formatted_exact
+                
+                # Add decimal solution
+                if solution.get('decimal') is not None:
+                    precision = settings.get('decimal_precision', 4)
+                    decimal_str = f"{solution['decimal']:.{precision}f}"
+                    if solution.get('exact'):
+                        latex += f" = {decimal_str}"
+                    else:
+                        latex += decimal_str
+                
+                # Add units
+                dimension = self._get_dimension(group['parts'][0])
+                latex += f" \\ \\text{{u}}^{{{dimension}}}$"
+            else:
+                # Fallback to just solution if no integral
+                latex += self._format_solution_only(solution, settings, group)
+        else:
+            # Just show solution without integral
+            latex += self._format_solution_only(solution, settings, group)
+        
+        latex += "\n\\end{itemize}"
+        
+        return latex
+    
+    def _get_integral_latex(self, group: Dict[str, Any]) -> str:
+        """Get integral LaTeX from the first part or generate it"""
+        # Try to get from first part's latex field
+        first_part = group['parts'][0]
+        if first_part.get('latex', {}).get('integral_setup'):
+            return first_part['latex']['integral_setup']
+        
+        # If multiple parts, try to combine or use first
+        if len(group['parts']) > 1:
+            # For combined exercises, use the first integral as representative
+            return first_part.get('latex', {}).get('integral_setup', '')
+        
+        return ''
+    
+    def _format_solution_only(self, solution: Dict[str, Any], settings: Dict[str, Any], group: Dict[str, Any]) -> str:
+        """Format just the solution without integral"""
+        latex = ""
+        
         if solution.get('exact') or solution.get('decimal') is not None:
             exact_str = str(solution.get('exact', ''))
             
@@ -229,8 +302,6 @@ class LaTeXGenerator:
             # Add units and dimension
             dimension = self._get_dimension(group['parts'][0])
             latex += f" \\ \\text{{u}}^{{{dimension}}}$"
-        
-        latex += "\n\\end{itemize}"
         
         return latex
     
