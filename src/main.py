@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import sys
 import time
@@ -224,16 +225,21 @@ def main():
         help='Path to input JSON file'
     )
     
-    args = parser.parse_args()  # ← Esta línea faltaba
+    args = parser.parse_args()
     
     # Verify input file exists
     if not Path(args.input).exists():
-        print(f"Error: Input file not found: {args.input}")
+        print(f"Error: Input file '{args.input}' does not exist")
         sys.exit(1)
     
     # Create orchestrator and process
     orchestrator = MathSolverOrchestrator()
     orchestrator.process_assignment(args.input)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+    
+    
+'''
+python src/main.py --input data/input/C3_2025_T18_3_integrales.json
+'''

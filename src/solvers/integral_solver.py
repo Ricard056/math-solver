@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sympy as sp
 from typing import List, Tuple, Optional, Dict, Any
 import re
@@ -54,7 +55,7 @@ class IntegralSolver:
         except Exception as e:
             raise ValueError(f"Cannot parse expression '{expr_str}': {e}")
     
-def solve_integral(self, exercise) -> Tuple[Optional[str], Optional[float]]:
+    def solve_integral(self, exercise: 'Exercise') -> Tuple[Optional[str], Optional[float]]:
         """Solve the integral and return exact and decimal solutions"""
         try:
             # Parse the function
@@ -93,7 +94,7 @@ def solve_integral(self, exercise) -> Tuple[Optional[str], Optional[float]]:
             print(f"Error solving integral: {e}")
             return None, None
     
-def generate_latex_integral(self, exercise) -> str:
+    def generate_latex_integral(self, exercise: 'Exercise') -> str:
         """Generate LaTeX code for the integral setup"""
         # Sort integrals by order (outer to inner for display)
         sorted_integrals = sorted(exercise.integrals, key=lambda x: -x.order)
@@ -112,7 +113,7 @@ def generate_latex_integral(self, exercise) -> str:
         
         return latex.strip()
     
-def determine_quantity_type(self, exercise) -> Optional[str]:
+    def determine_quantity_type(self, exercise: 'Exercise') -> Optional[str]:
         """Determine if integral represents Area, Volume, or Mass"""
         num_integrals = len(exercise.integrals)
         coord_system = exercise.coordinate_system
