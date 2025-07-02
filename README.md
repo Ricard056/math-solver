@@ -16,12 +16,15 @@
 # │   └── utils/
 # │       └── file_handler.py         # JSON file handling
 
+
 ```
 math-solver
+├─ CLAUDE.md
 ├─ config
 ├─ data
 │  └─ input
-│     └─ C3_2025_T16_3_integrales.json
+│     ├─ C3_2025_T16_3_integrales.json
+│     └─ C3_2025_T18_3_integrales.json
 ├─ GitWorkflow.md
 ├─ LICENSE
 ├─ README.md
@@ -37,9 +40,9 @@ math-solver
 │  ├─ solvers
 │  │  ├─ integral_solver.py
 │  │  └─ __init__.py
-│  ├─ utils
-│  │  └─ file_handler.py
-│  └─ __init__.py
+│  └─ utils
+│     ├─ file_handler.py
+│     └─ __init__.py
 └─ tests
    └─ TODAVIA SIN IMPLEMENTAR.txt
 

@@ -11,28 +11,88 @@ class LaTeXGenerator:
         self.template = self._load_template()
     
     def _load_template(self) -> str:
-        """Load LaTeX document template"""
+        """Load LaTeX document template with improved structure"""
         return r"""
-\documentclass[12pt,letterpaper]{article}
+\documentclass[12pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath}
 \usepackage{geometry}
-\geometry{left=2cm,right=2cm,top=2.5cm,bottom=2.5cm}
-
-\title{<<TITLE>>}
-\author{<<COURSE>>}
-\date{<<DATE>>}
-
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{lmodern}
+\geometry{letterpaper, margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{<<ASSIGNMENT_TYPE>> <<NUMBER>>}
+\lhead{Solucionario}
+\cfoot{\thepage}
+\setlength{\droptitle}{-4em}
+\title{\textbf{<<ASSIGNMENT_TYPE>> <<NUMBER>> \\[0.5em] \large Solucionario}}
+\author{}
+\date{}
 \begin{document}
 \maketitle
-
-\section*{Ejercicios}
-
+\section*{Resultados}
+\everymath{\displaystyle}
+\setlength{\jot}{10pt}
+\begin{enumerate}
 <<EXERCISES>>
-
+\end{enumerate}
 \end{document}
 """
+    
+    def _decimal_to_fraction(self, decimal_val: float) -> str:
+        """Convert decimal to fraction string for exact display"""
+        from fractions import Fraction
+        
+        # Convert to fraction with reasonable denominator limit
+        frac = Fraction(decimal_val).limit_denominator(1000)
+        
+        if frac.denominator == 1:
+            return str(frac.numerator)
+        else:
+            return f"{frac.numerator}/{frac.denominator}"
+    
+    def _format_mathematical_expression(self, expr_str: str) -> str:
+        """Convert mathematical expressions to proper LaTeX"""
+        replacements = {
+            'pi': '\\pi',
+            'theta': '\\theta',
+            'phi': '\\phi',
+            'rho': '\\rho',
+            '**': '^',
+            '*': '\\cdot ',
+            'sqrt(': '\\sqrt{',
+            'exp(': 'e^{',
+            'sin(': '\\sin(',
+            'cos(': '\\cos(',
+            'E': 'e'
+        }
+        
+        result = expr_str
+        for old, new in replacements.items():
+            result = result.replace(old, new)
+        
+        # Handle parentheses for sqrt and exp
+        if '\\sqrt{' in result:
+            # Simple parentheses matching for sqrt
+            result = self._fix_function_braces(result, '\\sqrt{')
+        if 'e^{' in result:
+            # Simple parentheses matching for exp
+            result = self._fix_function_braces(result, 'e^{')
+            
+        return result
+    
+    def _fix_function_braces(self, expr: str, func_pattern: str) -> str:
+        """Fix braces for functions like sqrt and exp"""
+        # This is a simplified version - handles basic cases
+        if func_pattern in expr:
+            # For now, just ensure closing braces exist
+            open_count = expr.count('{')
+            close_count = expr.count('}')
+            if open_count > close_count:
+                expr += '}' * (open_count - close_count)
+        return expr
     
     def generate_latex(self, data: Dict[str, Any], output_path: str) -> None:
         """Generate LaTeX file from intermediate JSON"""
@@ -41,12 +101,7 @@ class LaTeXGenerator:
         course = metadata['course']
         assignment = metadata['assignment']
         
-        # Prepare title
-        title = f"{assignment['type']} {assignment['number']} - Integrales"
-        course_name = f"{course['name']} - {assignment['year']}"
-        date = f"{self._month_name(assignment['month'])} {assignment['year']}"
-        
-        # Group exercises by ID
+        # Group exercises by ID and sum parts
         grouped_exercises = self._group_exercises(data['exercises'])
         
         # Generate exercise content
@@ -54,9 +109,8 @@ class LaTeXGenerator:
         
         # Fill template
         latex_content = self.template
-        latex_content = latex_content.replace('<<TITLE>>', title)
-        latex_content = latex_content.replace('<<COURSE>>', course_name)
-        latex_content = latex_content.replace('<<DATE>>', date)
+        latex_content = latex_content.replace('<<ASSIGNMENT_TYPE>>', assignment['type'])
+        latex_content = latex_content.replace('<<NUMBER>>', str(assignment['number']))
         latex_content = latex_content.replace('<<EXERCISES>>', exercises_latex)
         
         # Save LaTeX file
@@ -65,155 +119,144 @@ class LaTeXGenerator:
         
         print(f"LaTeX file generated: {output_path}")
     
-    def _group_exercises(self, exercises: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-        """Group exercises by ID for display"""
+    def _group_exercises(self, exercises: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+        """Group exercises by ID+letter and sum decimal solutions"""
         groups = {}
         
         for exercise in exercises:
-            # Create group key
-            key = exercise['id']
+            # Create group key using id + id_letter combination
+            key = str(exercise['id'])
             if exercise['id_letter']:
                 key += exercise['id_letter']
             
             if key not in groups:
-                groups[key] = []
-            groups[key].append(exercise)
+                # Initialize group with first exercise
+                groups[key] = {
+                    'id': exercise['id'],
+                    'id_letter': exercise['id_letter'],
+                    'combined_solution': {
+                        'exact': None,
+                        'decimal': 0.0,
+                        'quantity_type': exercise.get('solution', {}).get('quantity_type'),
+                        'units': exercise.get('solution', {}).get('units')
+                    },
+                    'display_settings': exercise.get('display_settings', {}),
+                    'parts': []
+                }
+            
+            # Add this exercise as a part
+            groups[key]['parts'].append(exercise)
+            
+            # Sum decimal solutions
+            if exercise.get('solution', {}).get('decimal') is not None:
+                groups[key]['combined_solution']['decimal'] += exercise['solution']['decimal']
+        
+        # Create combined exact solutions for display
+        for key, group in groups.items():
+            if len(group['parts']) > 1:
+                # Multiple parts - convert decimal sum to fraction if possible
+                decimal_val = group['combined_solution']['decimal']
+                group['combined_solution']['exact'] = self._decimal_to_fraction(decimal_val)
+            else:
+                # Single part - use original exact solution
+                original_solution = group['parts'][0].get('solution', {})
+                group['combined_solution']['exact'] = original_solution.get('exact')
+                group['combined_solution']['decimal'] = original_solution.get('decimal', 0.0)
         
         return groups
     
-    def _generate_exercises_latex(self, grouped_exercises: Dict[str, List[Dict[str, Any]]]) -> str:
+    def _generate_exercises_latex(self, grouped_exercises: Dict[str, Dict[str, Any]]) -> str:
         """Generate LaTeX for all exercises"""
         latex_parts = []
         
-        for group_id, exercises in sorted(grouped_exercises.items()):
-            if len(exercises) == 1:
-                # Single exercise
-                latex_parts.append(self._generate_single_exercise(exercises[0], group_id))
-            else:
-                # Multiple parts
-                latex_parts.append(self._generate_multi_part_exercise(exercises, group_id))
+        for group_id in sorted(grouped_exercises.keys(), key=self._sort_key):
+            group = grouped_exercises[group_id]
+            latex_parts.append(self._generate_exercise_latex(group, group_id))
         
-        return '\n\n'.join(latex_parts)
+        return '\n'.join(latex_parts)
     
-    def _generate_single_exercise(self, exercise: Dict[str, Any], display_id: str) -> str:
-        """Generate LaTeX for a single exercise"""
-        latex = f"\\subsection*{{Ejercicio {display_id}}}\n\n"
+    def _sort_key(self, key: str) -> tuple:
+        """Create sort key for exercise IDs (handles numbers and letters)"""
+        # Extract number and letter parts
+        import re
+        match = re.match(r'(\d+)([a-z]*)', key)
+        if match:
+            num_part = int(match.group(1))
+            letter_part = match.group(2) or ''
+            return (num_part, letter_part)
+        return (0, key)
+    
+    def _generate_exercise_latex(self, group: Dict[str, Any], display_id: str) -> str:
+        """Generate LaTeX for a single exercise or group"""
+        settings = group['display_settings']
+        solution = group['combined_solution']
         
-        settings = exercise.get('display_settings', {})
+        latex = "\\item \n\\begin{itemize}\n"
         
-        if settings.get('show_equation', True):
-            # Get LaTeX integral or generate it
-            integral_latex = exercise.get('latex', {}).get('integral_setup')
-            if not integral_latex:
-                # Generate basic integral display
-                integral_latex = self._generate_integral_display(exercise)
-            
-            if settings.get('show_quantity_label', True) and exercise.get('solution', {}).get('quantity_type'):
-                latex += f"{exercise['solution']['quantity_type']} = "
-            
-            latex += f"$${integral_latex}$$\n\n"
+        if group['id_letter']:
+            # Exercise with letter (like 5a, 5b)
+            latex += f"    \\item[] \\textbf{{{group['id_letter']})}} "
+        else:
+            # Exercise without letter  
+            latex += f"    \\item[] "
         
         # Add solution
-        solution = exercise.get('solution', {})
-        if solution.get('exact') or solution.get('decimal'):
-            latex += "\\textbf{Solución:} "
+        if solution.get('exact') or solution.get('decimal') is not None:
+            exact_str = str(solution.get('exact', ''))
             
-            if solution.get('exact'):
-                latex += f"${solution['exact']}$"
+            if exact_str and '/' in exact_str:
+                # Show fraction form with \dfrac
+                parts = exact_str.split('/')
+                if len(parts) == 2:
+                    numerator = self._format_mathematical_expression(parts[0])
+                    denominator = self._format_mathematical_expression(parts[1])
+                    latex += f"$\\dfrac{{{numerator}}}{{{denominator}}} = "
+                else:
+                    # Fallback for complex fractions
+                    formatted_exact = self._format_mathematical_expression(exact_str)
+                    latex += f"${formatted_exact} = "
+            elif exact_str:
+                formatted_exact = self._format_mathematical_expression(exact_str)
+                latex += f"${formatted_exact} = "
+            else:
+                latex += "$"
             
-            if solution.get('decimal'):
+            if solution.get('decimal') is not None:
                 precision = settings.get('decimal_precision', 4)
                 decimal_str = f"{solution['decimal']:.{precision}f}"
-                latex += f" $\\approx {decimal_str}$"
+                latex += f"{decimal_str}"
             
-            if settings.get('units'):
-                latex += f" {settings['units']}$^{self._get_dimension(exercise)}$"
-            
-            latex += "\n"
+            # Add units and dimension
+            dimension = self._get_dimension(group['parts'][0])
+            latex += f" \\ \\text{{u}}^{{{dimension}}}$"
+        
+        latex += "\n\\end{itemize}"
         
         return latex
-    
-    def _generate_multi_part_exercise(self, exercises: List[Dict[str, Any]], group_id: str) -> str:
-        """Generate LaTeX for multi-part exercise"""
-        latex = f"\\subsection*{{Ejercicio {group_id}}}\n\n"
-        
-        for i, exercise in enumerate(exercises):
-            part_letter = chr(ord('a') + i)
-            latex += f"\\textbf{{Parte {part_letter})}}\n\n"
-            
-            # Use same logic as single exercise but without subsection
-            settings = exercise.get('display_settings', {})
-            
-            if settings.get('show_equation', True):
-                integral_latex = exercise.get('latex', {}).get('integral_setup')
-                if not integral_latex:
-                    integral_latex = self._generate_integral_display(exercise)
-                
-                if settings.get('show_quantity_label', True) and exercise.get('solution', {}).get('quantity_type'):
-                    latex += f"{exercise['solution']['quantity_type']} = "
-                
-                latex += f"$${integral_latex}$$\n\n"
-            
-            # Add solution
-            solution = exercise.get('solution', {})
-            if solution.get('exact') or solution.get('decimal'):
-                latex += "Solución: "
-                
-                if solution.get('exact'):
-                    latex += f"${solution['exact']}$"
-                
-                if solution.get('decimal'):
-                    precision = settings.get('decimal_precision', 4)
-                    decimal_str = f"{solution['decimal']:.{precision}f}"
-                    latex += f" $\\approx {decimal_str}$"
-                
-                if settings.get('units'):
-                    latex += f" {settings['units']}$^{self._get_dimension(exercise)}$"
-                
-                latex += "\n\n"
-        
-        return latex
-    
-    def _generate_integral_display(self, exercise: Dict[str, Any]) -> str:
-        """Generate basic integral display"""
-        sorted_integrals = sorted(exercise['integrals'], key=lambda x: -x['order'])
-        
-        latex = ""
-        for integral in sorted_integrals:
-            latex += f"\\int_{{{integral['limits']['lower']}}}^{{{integral['limits']['upper']}}} "
-        
-        function_latex = exercise['function'].replace('**', '^').replace('*', '\\cdot ')
-        latex += f"{function_latex} \\, "
-        
-        for integral in sorted(exercise['integrals'], key=lambda x: x['order']):
-            latex += f"d{integral['var']} "
-        
-        return latex.strip()
     
     def _get_dimension(self, exercise: Dict[str, Any]) -> int:
         """Get dimension based on number of integrals"""
-        return len(exercise['integrals'])
-    
-    def _month_name(self, month: int) -> str:
-        """Convert month number to Spanish name"""
-        months = {
-            1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril",
-            5: "Mayo", 6: "Junio", 7: "Julio", 8: "Agosto",
-            9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
-        }
-        return months.get(month, "")
+        return len(exercise.get('integrals', []))
     
     def compile_pdf(self, tex_path: str) -> bool:
         """Compile LaTeX to PDF (requires pdflatex)"""
         try:
+            # Get the directory and filename
+            tex_dir = os.path.dirname(os.path.abspath(tex_path))
+            tex_filename = os.path.basename(tex_path)
+            
             # Run pdflatex twice for references
             for _ in range(2):
                 result = subprocess.run(
-                    ['pdflatex', '-interaction=nonstopmode', tex_path],
+                    ['pdflatex', '-interaction=nonstopmode', tex_filename],
                     capture_output=True,
                     text=True,
-                    cwd=os.path.dirname(tex_path)
+                    cwd=tex_dir
                 )
+                
+                if result.returncode != 0:
+                    print(f"pdflatex error: {result.stdout}")
+                    print(f"pdflatex stderr: {result.stderr}")
             
             # Check if PDF was created
             pdf_path = tex_path.replace('.tex', '.pdf')
