@@ -4,7 +4,7 @@ from typing import List, Tuple, Optional, Dict, Any
 import re
 
 class IntegralSolver:
-    """Solves integrals with automatic coordinate system detection"""
+    """Solves integrals with automatic coordinate system detection and improved quantity type detection"""
     
     COORDINATE_PATTERNS = {
         'cartesian': {'x', 'y', 'z'},
@@ -43,6 +43,129 @@ class IntegralSolver:
         
         # Default to cartesian if uncertain
         return 'cartesian'
+    
+    def normalize_function(self, func_str: str) -> str:
+        """Remove constant multiplicative factors to identify base function"""
+        if not func_str or func_str.strip() == "":
+            return "1"
+        
+        # Parse the expression
+        try:
+            expr = sp.sympify(func_str, locals=self.symbols)
+            
+            # Extract non-constant factors
+            if expr.is_number:
+                return "1"
+            
+            # Handle products - separate constants from variables
+            if expr.is_Mul:
+                constant_part = 1
+                variable_part = 1
+                
+                for factor in expr.args:
+                    if factor.is_number:
+                        constant_part *= factor
+                    else:
+                        variable_part *= factor
+                
+                if variable_part == 1:
+                    return "1"
+                else:
+                    return str(variable_part)
+            
+            # If not a product, return as is (already normalized)
+            return str(expr)
+            
+        except Exception:
+            # Fallback: manual normalization for simple cases
+            func_str = func_str.strip()
+            
+            # Remove leading constants like "2*", "3*", etc.
+            pattern = r'^(\d+(?:\.\d+)?)\s*\*\s*(.+)$'
+            match = re.match(pattern, func_str)
+            if match:
+                return match.group(2)
+            
+            # Handle pure constants
+            if re.match(r'^\d+(?:\.\d+)?$', func_str):
+                return "1"
+            
+            return func_str
+    
+    def is_spherical_jacobian(self, normalized_func: str) -> bool:
+        """Detect if function is only the spherical Jacobian"""
+        spherical_jacobian_patterns = [
+            r'^r\*\*2\*sin\(phi\)$',
+            r'^rho\*\*2\*sin\(theta\)$',
+            r'^r\^2\*sin\(phi\)$',
+            r'^rho\^2\*sin\(theta\)$',
+            r'^r\*\*2\*sin\(theta\)$',  # Alternative naming
+            r'^rho\*\*2\*sin\(phi\)$'   # Alternative naming
+        ]
+        
+        for pattern in spherical_jacobian_patterns:
+            if re.match(pattern, normalized_func.replace(' ', '')):
+                return True
+        
+        return False
+    
+    def is_cylindrical_jacobian(self, normalized_func: str) -> bool:
+        """Detect if function is only the cylindrical Jacobian"""
+        return normalized_func.strip() == "r"
+    
+    def determine_quantity_type_and_units(self, exercise: 'Exercise', base_unit: str = "u") -> Tuple[Optional[str], Optional[str]]:
+        """Determine quantity type and units based on function and coordinate system"""
+        function = exercise.function
+        coordinate_system = exercise.coordinate_system
+        num_integrals = len(exercise.integrals)
+        
+        # Normalize function (remove constant factors)
+        normalized_function = self.normalize_function(function)
+        
+        if coordinate_system == "cartesian":
+            if normalized_function == "1":
+                # Pure geometric integrals
+                if num_integrals == 1:
+                    return "Length", f"{base_unit}"
+                elif num_integrals == 2:
+                    return "Area", f"{base_unit}^2"
+                elif num_integrals == 3:
+                    return "Volume", f"{base_unit}^3"
+            else:
+                # Function represents additional physical quantity
+                if num_integrals == 1:
+                    return None, f"{base_unit}"  # Unclear what 1D integral with function represents
+                elif num_integrals == 2:
+                    return "Volume", f"{base_unit}^3"  # Surface with height/thickness
+                elif num_integrals == 3:
+                    return "Mass", f"{base_unit}"      # Density × volume
+                    
+        elif coordinate_system == "polar":
+            if normalized_function == "r":  # Only Jacobian
+                return "Area", f"{base_unit}^2"
+            else:  # Additional function beyond Jacobian
+                return "Volume", f"{base_unit}^3"
+                
+        elif coordinate_system == "cylindrical":
+            if self.is_cylindrical_jacobian(normalized_function):
+                if num_integrals == 2:
+                    return "Area", f"{base_unit}^2"
+                elif num_integrals == 3:
+                    return "Volume", f"{base_unit}^3"
+            else:
+                if num_integrals == 2:
+                    return "Volume", f"{base_unit}^3"
+                elif num_integrals == 3:
+                    return "Mass", f"{base_unit}"
+                    
+        elif coordinate_system == "spherical":
+            if self.is_spherical_jacobian(normalized_function):
+                return "Volume", f"{base_unit}^3"
+            else:
+                return "Mass", f"{base_unit}"
+        
+        # Default fallback
+        return None, None
     
     def parse_expression(self, expr_str: str) -> sp.Expr:
         """Parse mathematical expression string to SymPy expression"""
@@ -113,17 +236,12 @@ class IntegralSolver:
         
         return latex.strip()
     
-    def determine_quantity_type(self, exercise: 'Exercise') -> Optional[str]:
-        """Determine if integral represents Area, Volume, or Mass"""
-        num_integrals = len(exercise.integrals)
-        coord_system = exercise.coordinate_system
-        
-        if num_integrals == 2:
-            return "Area"
-        elif num_integrals == 3:
-            # Check if function suggests density (contains rho or density keywords)
-            if 'rho' in exercise.function.lower() or 'density' in exercise.function.lower():
-                return "Mass"
-            return "Volume"
-        
-        return None
+    def determine_quantity_type(self, exercise: 'Exercise', base_unit: str = "u") -> Optional[str]:
+        """Determine quantity type using the improved logic"""
+        quantity_type, _ = self.determine_quantity_type_and_units(exercise, base_unit)
+        return quantity_type
+    
+    def determine_units(self, exercise: 'Exercise', base_unit: str = "u") -> Optional[str]:
+        """Determine units using the improved logic"""
+        _, units = self.determine_quantity_type_and_units(exercise, base_unit)
+        return units

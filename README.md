@@ -16,7 +16,6 @@
 # │   └── utils/
 # │       └── file_handler.py         # JSON file handling
 
-
 ```
 math-solver
 ├─ CLAUDE.md
@@ -25,6 +24,9 @@ math-solver
 │  └─ input
 │     ├─ C3_2025_T16_3_integrales.json
 │     └─ C3_2025_T18_3_integrales.json
+├─ docs
+│  ├─ 1_summary_light.md
+│  └─ 2_summary_json_transformation.md
 ├─ GitWorkflow.md
 ├─ LICENSE
 ├─ README.md

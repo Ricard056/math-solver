@@ -124,7 +124,7 @@ class MathSolverOrchestrator:
         }
     
     def _process_exercise(self, exercise_data: Dict[str, Any], global_settings: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a single exercise"""
+        """Process a single exercise with improved quantity type detection"""
         # Create Exercise object
         exercise = Exercise.from_dict(exercise_data)
         
@@ -135,14 +135,21 @@ class MathSolverOrchestrator:
         # Solve integral
         exact_solution, decimal_solution = self.integral_solver.solve_integral(exercise)
         
+        # Get base unit from global settings
+        base_unit = global_settings.get('units', 'u')
+        
+        # Determine quantity type and units using improved logic
+        quantity_type = self.integral_solver.determine_quantity_type(exercise, base_unit)
+        units = self.integral_solver.determine_units(exercise, base_unit)
+        
         # Create solution object
         from models.exercise import Solution, LaTeXContent, ComputationDetails
         
         exercise.solution = Solution(
             exact=exact_solution,
             decimal=decimal_solution,
-            quantity_type=self.integral_solver.determine_quantity_type(exercise),
-            units=None  # Will be determined later if needed
+            quantity_type=quantity_type,
+            units=units  # Now properly calculated based on function and coordinate system
         )
         
         # Generate LaTeX
@@ -166,7 +173,7 @@ class MathSolverOrchestrator:
         )
         
         return exercise.to_dict()
-    
+        
     def _create_empty_exercise(self, exercise_data: Dict[str, Any], global_settings: Dict[str, Any]) -> Dict[str, Any]:
         """Create exercise with null solutions for failed processing"""
         result = exercise_data.copy()

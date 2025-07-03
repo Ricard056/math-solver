@@ -55,13 +55,14 @@ class LaTeXGenerator:
     
     def _format_mathematical_expression(self, expr_str: str) -> str:
         """Convert mathematical expressions to proper LaTeX"""
+        result = expr_str
+        
+        # Handle mathematical constants and functions first
         replacements = {
             'pi': '\\pi',
-            'theta': '\\theta',
+            'theta': '\\theta', 
             'phi': '\\phi',
             'rho': '\\rho',
-            '**': '^',
-            '*': '\\cdot ',
             'sqrt(': '\\sqrt{',
             'exp(': 'e^{',
             'sin(': '\\sin(',
@@ -69,16 +70,18 @@ class LaTeXGenerator:
             'E': 'e'
         }
         
-        result = expr_str
         for old, new in replacements.items():
             result = result.replace(old, new)
         
-        # Handle parentheses for sqrt and exp
+        # Handle operators (order matters!)
+        result = result.replace('**', '^')
+        result = result.replace('*', ' ')  # Remove multiplication symbols
+        result = result.replace('\\cdot', '')  # Remove \cdot
+        
+        # Fix parentheses for functions that need closing braces
         if '\\sqrt{' in result:
-            # Simple parentheses matching for sqrt
             result = self._fix_function_braces(result, '\\sqrt{')
         if 'e^{' in result:
-            # Simple parentheses matching for exp
             result = self._fix_function_braces(result, 'e^{')
             
         return result
@@ -141,11 +144,16 @@ class LaTeXGenerator:
                         'units': exercise.get('solution', {}).get('units')
                     },
                     'display_settings': exercise.get('display_settings', {}),
-                    'parts': []
+                    'parts': [],
+                    'has_multiple_parts': False
                 }
             
             # Add this exercise as a part
             groups[key]['parts'].append(exercise)
+            
+            # Check if this group has multiple parts (any exercise with id_part)
+            if exercise.get('id_part') is not None:
+                groups[key]['has_multiple_parts'] = True
             
             # Sum decimal solutions
             if exercise.get('solution', {}).get('decimal') is not None:
@@ -211,11 +219,15 @@ class LaTeXGenerator:
             elif quantity_type == 'Mass':
                 latex += "M = "
         
-        # Show integral equation if enabled and available
-        if settings.get('show_equation', False):
+        # Show integral equation ONLY if enabled AND it's NOT a multi-part exercise
+        show_equation = settings.get('show_equation', False) and not group['has_multiple_parts']
+        
+        if show_equation:
             integral_latex = self._get_integral_latex(group)
             if integral_latex:
-                latex += f"$\\displaystyle {integral_latex} = "
+                # Format the integral LaTeX properly
+                formatted_integral = self._format_mathematical_expression(integral_latex)
+                latex += f"$\\displaystyle {formatted_integral} = "
                 
                 # Add exact solution if available
                 if solution.get('exact'):
