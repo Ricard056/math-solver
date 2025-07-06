@@ -26,13 +26,24 @@ math-solver
 │     └─ C3_2025_T18_3_integrales.json
 ├─ docs
 │  ├─ 1_summary_light.md
-│  └─ 2_summary_json_transformation.md
+│  ├─ 2_summary_json_transformation.md
+│  ├─ 3_summary_extended.md
+│  ├─ 4_sample_json_input.md
+│  ├─ 5_sample_json_intermediate.md
+│  ├─ 6_claude_requirements_for_implementation.md
+│  ├─ reference_json
+│  │  ├─ C3_2025_T18_3_integrales.json
+│  │  ├─ C3_2025_T18_integrales_v1.json
+│  │  ├─ json_extended.md
+│  │  └─ json_input.md
+│  └─ summary_light.md
 ├─ GitWorkflow.md
 ├─ LICENSE
 ├─ README.md
 ├─ requirements.txt
 ├─ src
 │  ├─ generators
+│  │  ├─ latex_formatter.py
 │  │  ├─ latex_generator.py
 │  │  └─ __init__.py
 │  ├─ main.py

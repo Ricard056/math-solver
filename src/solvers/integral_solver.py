@@ -3,6 +3,8 @@ import sympy as sp
 from typing import List, Tuple, Optional, Dict, Any
 import re
 
+from models.exercise import Exercise
+
 class IntegralSolver:
     """Solves integrals with automatic coordinate system detection and improved quantity type detection"""
     
