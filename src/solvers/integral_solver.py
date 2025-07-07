@@ -164,9 +164,22 @@ class IntegralSolver:
                 return "Volume", f"{base_unit}^3"
             else:
                 return "Mass", f"{base_unit}"
-        
+            
+        '''
         # Default fallback
         return None, None
+        '''
+        # FALLBACK MEJORADO - En lugar de (None, None)
+        # Usar una heurística basada solo en el número de integrales
+        if num_integrals == 1:
+            return "Length", f"{base_unit}"
+        elif num_integrals == 2:
+            return "Area", f"{base_unit}^2"
+        elif num_integrals == 3:
+            return "Volume", f"{base_unit}^3"
+        else:
+            # Para 4+ integrales, asumir una medida generalizada
+            return "Measure", f"{base_unit}^{num_integrals}"
     
     def parse_expression(self, expr_str: str) -> sp.Expr:
         """Parse mathematical expression string to SymPy expression"""

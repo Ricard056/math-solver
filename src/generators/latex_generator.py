@@ -90,24 +90,22 @@ class LaTeXGenerator:
         return "\\end{enumerate}\n\\end{document}"
     
     def _group_exercises(self, exercises: List[Dict[str, Any]]) -> OrderedDict:
-        """Group exercises by id and id_letter for proper display"""
+        """Group exercises correctly - LA CLAVE ESTÁ AQUÍ"""
         grouped = OrderedDict()
         
         for exercise in exercises:
-            # Create grouping key
             base_id = exercise['id']
             id_letter = exercise.get('id_letter')
             
-            if id_letter:
-                group_key = f"{base_id}{id_letter}"
-            else:
-                group_key = base_id
+            # REGLA CORREGIDA: 
+            # Solo agrupar por base_id (sin considerar id_letter para agrupación)
+            # El id_letter se usa solo para display, no para agrupación
+            group_key = base_id
             
             # Initialize group if not exists
             if group_key not in grouped:
                 grouped[group_key] = {
                     'base_id': base_id,
-                    'id_letter': id_letter,
                     'parts': []
                 }
             
@@ -127,184 +125,209 @@ class LaTeXGenerator:
         return "\n".join(items)
     
     def _generate_exercise_item(self, group_data: Dict[str, Any]) -> str:
-        """Generate a single exercise item (may contain multiple parts)"""
+        """Generate a single exercise item"""
         base_id = group_data['base_id']
-        id_letter = group_data['id_letter']
         parts = group_data['parts']
         
-        # Determine if this is a single exercise or multiple parts
-        if len(parts) == 1:
-            return self._generate_single_exercise(parts[0], id_letter)
+        # Organizar las partes por id_letter y id_part
+        organized_parts = self._organize_parts(parts)
+        
+        # Generar el item
+        if len(organized_parts) == 1 and len(organized_parts[0]['exercises']) == 1:
+            # Caso simple: un solo ejercicio
+            return self._generate_single_exercise(organized_parts[0]['exercises'][0])
         else:
-            return self._generate_multi_part_exercise(base_id, id_letter, parts)
+            # Caso complejo: multiple sub-ejercicios
+            return self._generate_complex_exercise(organized_parts)
     
-    def _generate_single_exercise(self, exercise: Dict[str, Any], id_letter: Optional[str]) -> str:
+    def _organize_parts(self, parts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Organize parts by id_letter and id_part"""
+        # Agrupar por id_letter
+        letter_groups = {}
+        
+        for part in parts:
+            id_letter = part.get('id_letter')
+            key = id_letter if id_letter else 'no_letter'
+            
+            if key not in letter_groups:
+                letter_groups[key] = []
+            letter_groups[key].append(part)
+        
+        # Organizar cada grupo de letras
+        organized = []
+        for letter_key in sorted(letter_groups.keys()):
+            exercises = letter_groups[letter_key]
+            
+            # Si el grupo tiene múltiples partes con id_part, decidir si sumar
+            if len(exercises) > 1:
+                # Verificar si se pueden sumar
+                if self._should_sum_parts(exercises):
+                    # Crear una entrada sumada
+                    organized.append({
+                        'id_letter': exercises[0].get('id_letter'),
+                        'is_sum': True,
+                        'exercises': exercises
+                    })
+                else:
+                    # Mantener por separado
+                    for ex in exercises:
+                        organized.append({
+                            'id_letter': ex.get('id_letter'),
+                            'is_sum': False,
+                            'exercises': [ex]
+                        })
+            else:
+                # Un solo ejercicio
+                organized.append({
+                    'id_letter': exercises[0].get('id_letter'),
+                    'is_sum': False,
+                    'exercises': exercises
+                })
+        
+        return organized
+    
+    def _should_sum_parts(self, parts: List[Dict[str, Any]]) -> bool:
+        """Determine if parts should be summed"""
+        if len(parts) <= 1:
+            return False
+        
+        # Verificar que todas las partes tengan valores decimales válidos
+        for part in parts:
+            solution = part.get('solution', {})
+            if solution.get('decimal') is None:
+                return False
+        
+        # Si no tienen id_letter, siempre sumar (ej: ejercicio 4, 6)
+        if not parts[0].get('id_letter'):
+            return True
+        
+        # Si tienen id_letter, verificar si tienen mismas unidades
+        first_units = parts[0].get('solution', {}).get('units')
+        if not first_units:
+            return False
+        
+        for part in parts:
+            if part.get('solution', {}).get('units') != first_units:
+                return False
+        
+        return True
+    
+    def _generate_single_exercise(self, exercise: Dict[str, Any]) -> str:
         """Generate a single exercise display"""
-        # Get exercise data
         solution = exercise.get('solution', {})
         latex_data = exercise.get('latex', {})
-        display_settings = exercise.get('display_settings', {})
         
-        # Format item number
-        item_format = ""
-        if id_letter:
-            item_format = f"[{id_letter})]"
-        
-        # Get quantity label
         quantity_type = solution.get('quantity_type')
         quantity_label = self.formatter.get_quantity_label(quantity_type)
         
-        # Clean integral setup
         integral_setup = latex_data.get('integral_setup', '')
         integral_clean = self.formatter.clean_integral_setup(integral_setup)
         
-        # Format solution
         exact = solution.get('exact')
         decimal = solution.get('decimal')
-        units = display_settings.get('units', 'u')
-        precision = display_settings.get('decimal_precision', 4)
-        
-        # Determine units based on quantity type
-        units_display = self._determine_units_display(quantity_type, units)
+        units = solution.get('units')
+        precision = exercise.get('display_settings', {}).get('decimal_precision', 4)
         
         solution_display = self.formatter.format_solution_display(
-            exact, decimal, units_display, precision
+            exact, decimal, units, precision
         )
         
-        # Build the item
         if integral_setup and exact and decimal is not None:
             content = f"{quantity_label} = ${integral_clean} = {solution_display}$"
         else:
             content = f"{quantity_label} = {solution_display}"
         
-        return f"    \\item {item_format}\n    \\begin{{itemize}}\n        \\item[] {content}\n    \\end{{itemize}}"
+        return f"    \\item \n    \\begin{{itemize}}\n        \\item[] {content}\n    \\end{{itemize}}"
     
-    def _generate_multi_part_exercise(self, base_id: str, id_letter: Optional[str], parts: List[Dict[str, Any]]) -> str:
-        """Generate multi-part exercise with summed results"""
-        # Check if we should sum the parts
-        if self._should_sum_parts(parts):
-            return self._generate_summed_exercise(base_id, id_letter, parts)
-        else:
-            return self._generate_individual_parts_exercise(base_id, id_letter, parts)
-    
-    def _should_sum_parts(self, parts: List[Dict[str, Any]]) -> bool:
-        """Determine if parts should be summed or displayed individually"""
-        # Sum if all parts have the same quantity type and are numerical
-        if len(parts) <= 1:
-            return False
-        
-        first_quantity = parts[0].get('solution', {}).get('quantity_type')
-        if not first_quantity:
-            return False
-        
-        # Check if all parts have same quantity type and valid decimal values
-        for part in parts:
-            solution = part.get('solution', {})
-            if (solution.get('quantity_type') != first_quantity or 
-                solution.get('decimal') is None):
-                return False
-        
-        return True
-    
-    def _generate_summed_exercise(self, base_id: str, id_letter: Optional[str], parts: List[Dict[str, Any]]) -> str:
-        """Generate exercise with summed parts"""
-        # Calculate sum
-        total_decimal = sum(part.get('solution', {}).get('decimal', 0) for part in parts)
-        
-        # Get quantity info from first part
-        first_part = parts[0]
-        quantity_type = first_part.get('solution', {}).get('quantity_type')
-        quantity_label = self.formatter.get_quantity_label(quantity_type)
-        
-        # Get display settings
-        display_settings = first_part.get('display_settings', {})
-        precision = display_settings.get('decimal_precision', 4)
-        units = display_settings.get('units', 'u')
-        units_display = self._determine_units_display(quantity_type, units)
-        
-        # Build sum expression
-        decimal_values = [f"{part.get('solution', {}).get('decimal', 0):.{precision}f}" 
-                         for part in parts]
-        sum_expression = " + ".join(decimal_values)
-        total_str = f"{total_decimal:.{precision}f}"
-        
-        # Format item
-        item_format = ""
-        if id_letter:
-            item_format = f"[{id_letter})]"
-        
-        units_formatted = self.formatter._format_units(units_display)
-        content = f"{quantity_label} = ${sum_expression} = {total_str} \\ {units_formatted}$"
-        
-        return f"    \\item {item_format}\n    \\begin{{itemize}}\n        \\item[] {content}\n    \\end{{itemize}}"
-    
-    def _generate_individual_parts_exercise(self, base_id: str, id_letter: Optional[str], parts: List[Dict[str, Any]]) -> str:
-        """Generate exercise with individual parts displayed"""
+    def _generate_complex_exercise(self, organized_parts: List[Dict[str, Any]]) -> str:
+        """Generate complex exercise with multiple sub-parts"""
         item_lines = []
         
-        # Generate main item
-        item_format = ""
-        if id_letter:
-            item_format = f"[{id_letter})]"
-        
-        item_lines.append(f"    \\item {item_format}")
+        item_lines.append("    \\item ")
         item_lines.append("    \\begin{itemize}")
         
-        # Generate each part
-        for i, part in enumerate(parts):
-            part_number = part.get('id_part')
-            if part_number:
-                # Convert to letter: 1→a, 2→b, etc.
-                part_letter = chr(ord('a') + part_number - 1)
-                part_label = f"[{part_letter})]"
+        for part_data in organized_parts:
+            id_letter = part_data['id_letter']
+            is_sum = part_data['is_sum']
+            exercises = part_data['exercises']
+            
+            if is_sum:
+                # Generar suma
+                content = self._generate_sum_content(exercises)
+                letter_label = f"[{id_letter})]" if id_letter else "[]"
+                item_lines.append(f"        \\item{letter_label} {content}")
             else:
-                part_label = ""
-            
-            # Generate part content
-            solution = part.get('solution', {})
-            latex_data = part.get('latex', {})
-            display_settings = part.get('display_settings', {})
-            
-            quantity_type = solution.get('quantity_type')
-            quantity_label = self.formatter.get_quantity_label(quantity_type)
-            
-            integral_setup = latex_data.get('integral_setup', '')
-            integral_clean = self.formatter.clean_integral_setup(integral_setup)
-            
-            exact = solution.get('exact')
-            decimal = solution.get('decimal')
-            units = display_settings.get('units', 'u')
-            precision = display_settings.get('decimal_precision', 4)
-            
-            units_display = self._determine_units_display(quantity_type, units)
-            solution_display = self.formatter.format_solution_display(
-                exact, decimal, units_display, precision
-            )
-            
-            if integral_setup and exact and decimal is not None:
-                content = f"{quantity_label} = ${integral_clean} = {solution_display}$"
-            else:
-                content = f"{quantity_label} = {solution_display}"
-            
-            item_lines.append(f"        \\item{part_label} {content}")
+                # Generar ejercicio individual
+                exercise = exercises[0]
+                content = self._generate_exercise_content(exercise)
+                letter_label = f"[{id_letter})]" if id_letter else "[]"
+                item_lines.append(f"        \\item{letter_label} {content}")
         
         item_lines.append("    \\end{itemize}")
         
         return "\n".join(item_lines)
     
-    def _determine_units_display(self, quantity_type: Optional[str], base_units: str) -> str:
-        """Determine appropriate units based on quantity type"""
-        if not quantity_type:
-            return base_units
+    def _generate_sum_content(self, exercises: List[Dict[str, Any]]) -> str:
+        """Generate sum content for multiple exercises"""
+        # Calculate sum
+        total_decimal = sum(ex.get('solution', {}).get('decimal', 0) for ex in exercises)
         
-        if quantity_type == "Area":
-            return f"{base_units}^2"
-        elif quantity_type == "Volume":
-            return f"{base_units}^3"
-        elif quantity_type == "Mass":
-            return base_units  # Mass units don't change
+        # Determine dominant quantity and units
+        dominant_quantity = "Volume"
+        dominant_units = "u^3"
+        
+        # Buscar Volume en las partes
+        for ex in exercises:
+            solution = ex.get('solution', {})
+            if solution.get('quantity_type') == 'Volume':
+                dominant_quantity = 'Volume'
+                dominant_units = solution.get('units', 'u^3')
+                break
         else:
-            return base_units
+            # Si no hay Volume, usar la primera parte
+            first_solution = exercises[0].get('solution', {})
+            dominant_quantity = first_solution.get('quantity_type', 'Volume')
+            dominant_units = first_solution.get('units', 'u^3')
+        
+        quantity_label = self.formatter.get_quantity_label(dominant_quantity)
+        precision = exercises[0].get('display_settings', {}).get('decimal_precision', 4)
+        
+        # Build sum expression
+        decimal_values = [f"{ex.get('solution', {}).get('decimal', 0):.{precision}f}" 
+                         for ex in exercises]
+        sum_expression = " + ".join(decimal_values)
+        total_str = f"{total_decimal:.{precision}f}"
+        
+        units_formatted = self.formatter._format_units(dominant_units) if dominant_units else ""
+        if units_formatted:
+            return f"{quantity_label} = ${sum_expression} = {total_str} \\ {units_formatted}$"
+        else:
+            return f"{quantity_label} = ${sum_expression} = {total_str}$"
+    
+    def _generate_exercise_content(self, exercise: Dict[str, Any]) -> str:
+        """Generate content for a single exercise"""
+        solution = exercise.get('solution', {})
+        latex_data = exercise.get('latex', {})
+        
+        quantity_type = solution.get('quantity_type')
+        quantity_label = self.formatter.get_quantity_label(quantity_type)
+        
+        integral_setup = latex_data.get('integral_setup', '')
+        integral_clean = self.formatter.clean_integral_setup(integral_setup)
+        
+        exact = solution.get('exact')
+        decimal = solution.get('decimal')
+        units = solution.get('units')
+        precision = exercise.get('display_settings', {}).get('decimal_precision', 4)
+        
+        solution_display = self.formatter.format_solution_display(
+            exact, decimal, units, precision
+        )
+        
+        if integral_setup and exact and decimal is not None:
+            return f"{quantity_label} = ${integral_clean} = {solution_display}$"
+        else:
+            return f"{quantity_label} = {solution_display}"
     
     def compile_pdf(self, tex_path: str) -> None:
         """Attempt to compile LaTeX to PDF"""
