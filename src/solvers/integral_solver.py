@@ -134,9 +134,8 @@ class IntegralSolver:
                 elif num_integrals == 3:
                     return "Volume", f"{base_unit}^3"
             else:
-                # Function represents additional physical quantity
                 if num_integrals == 1:
-                    return None, f"{base_unit}"  # Unclear what 1D integral with function represents
+                    return "Area", f"{base_unit}^2"
                 elif num_integrals == 2:
                     return "Volume", f"{base_unit}^3"  # Surface with height/thickness
                 elif num_integrals == 3:
