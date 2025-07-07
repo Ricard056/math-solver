@@ -246,3 +246,7 @@ class IntegralSolver:
         """Determine units using the improved logic"""
         _, units = self.determine_quantity_type_and_units(exercise, base_unit)
         return units
+    
+    def get_quantity_and_units(self, exercise: 'Exercise', base_unit: str = "u") -> Tuple[Optional[str], Optional[str]]:
+        """Get both quantity type and units in a single call"""
+        return self.determine_quantity_type_and_units(exercise, base_unit)

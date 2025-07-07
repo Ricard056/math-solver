@@ -124,77 +124,83 @@ class MathSolverOrchestrator:
         }
     
     def _process_exercise(self, exercise_data: Dict[str, Any], global_settings: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a single exercise"""
-        # Create Exercise object
-        exercise = Exercise.from_dict(exercise_data)
-        
-        # Detect coordinate system
-        variables = [integral.var for integral in exercise.integrals]
-        exercise.coordinate_system = self.integral_solver.detect_coordinate_system(variables)
-        
-        # Solve integral
-        exact_solution, decimal_solution = self.integral_solver.solve_integral(exercise)
-        
-        # Create solution object
-        from models.exercise import Solution, LaTeXContent, ComputationDetails
-        
-        exercise.solution = Solution(
-            exact=exact_solution,
-            decimal=decimal_solution,
-            quantity_type=self.integral_solver.determine_quantity_type(exercise),
-            units=None  # Will be determined later if needed
-        )
-        
-        # Generate LaTeX
-        exercise.latex = LaTeXContent(
-            integral_setup=self.integral_solver.generate_latex_integral(exercise),
-            solution_steps=None,  # TODO: Implement step-by-step solution
-            final_result=None
-        )
-        
-        # Add computation details (placeholder)
-        exercise.computation_details = ComputationDetails(
-            intermediate_steps=None,
-            substitutions=None,
-            integration_method="symbolic"
-        )
-        
-        # Copy display settings
-        exercise.display_settings = self.file_handler.copy_display_settings(
-            global_settings,
-            exercise_data
-        )
-        
-        return exercise.to_dict()
+            """Process a single exercise"""
+            # Create Exercise object
+            exercise = Exercise.from_dict(exercise_data)
+            
+            # Detect coordinate system
+            variables = [integral.var for integral in exercise.integrals]
+            exercise.coordinate_system = self.integral_solver.detect_coordinate_system(variables)
+            
+            # Solve integral
+            exact_solution, decimal_solution = self.integral_solver.solve_integral(exercise)
+            
+            # Get base unit from global settings
+            base_unit = global_settings.get('units', 'u')
+            
+            # Get both quantity type and units
+            quantity_type, units = self.integral_solver.get_quantity_and_units(exercise, base_unit)
+            
+            # Create solution object
+            from models.exercise import Solution, LaTeXContent, ComputationDetails
+            
+            exercise.solution = Solution(
+                exact=exact_solution,
+                decimal=decimal_solution,
+                quantity_type=quantity_type,
+                units=units  # Ahora se llena correctamente
+            )
+            
+            # Generate LaTeX
+            exercise.latex = LaTeXContent(
+                integral_setup=self.integral_solver.generate_latex_integral(exercise),
+                solution_steps=None,  # TODO: Implement step-by-step solution
+                final_result=None
+            )
+            
+            # Add computation details (placeholder)
+            exercise.computation_details = ComputationDetails(
+                intermediate_steps=None,
+                substitutions=None,
+                integration_method="symbolic"
+            )
+            
+            # Copy display settings
+            exercise.display_settings = self.file_handler.copy_display_settings(
+                global_settings,
+                exercise_data
+            )
+            
+            return exercise.to_dict()
     
     def _create_empty_exercise(self, exercise_data: Dict[str, Any], global_settings: Dict[str, Any]) -> Dict[str, Any]:
-        """Create exercise with null solutions for failed processing"""
-        result = exercise_data.copy()
-        
-        # Add null fields
-        result['coordinate_system'] = None
-        result['solution'] = {
-            'exact': None,
-            'decimal': None,
-            'quantity_type': None,
-            'units': None
-        }
-        result['latex'] = {
-            'integral_setup': None,
-            'solution_steps': None,
-            'final_result': None
-        }
-        result['computation_details'] = {
-            'intermediate_steps': None,
-            'substitutions': None,
-            'integration_method': None
-        }
-        result['display_settings'] = self.file_handler.copy_display_settings(
-            global_settings,
-            exercise_data
-        )
-        
-        return result
+            """Create exercise with null solutions for failed processing"""
+            result = exercise_data.copy()
+            
+            # Add null fields
+            result['coordinate_system'] = None
+            result['solution'] = {
+                'exact': None,
+                'decimal': None,
+                'quantity_type': None,
+                'units': None  # Este también debe ser None cuando hay error
+            }
+            result['latex'] = {
+                'integral_setup': None,
+                'solution_steps': None,
+                'final_result': None
+            }
+            result['computation_details'] = {
+                'intermediate_steps': None,
+                'substitutions': None,
+                'integration_method': None
+            }
+            result['display_settings'] = self.file_handler.copy_display_settings(
+                global_settings,
+                exercise_data
+            )
+            
+            return result
     
     def _update_exercise_statistics(self, data: Dict[str, Any]) -> None:
         """Update exercise statistics in processing_info"""
