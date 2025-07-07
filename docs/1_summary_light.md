@@ -1,96 +1,174 @@
-Project Summary: Automatic Math Exercise Generator
-General Project Objective
-Development of an automated Python system that generates math exercises (specifically integrals) with their complete solutions. The system processes simple exercise definitions and produces a final PDF with professionally formatted solutions.
-System Architecture (3 Stages)
-1. Input JSON (Manual, Minimalist)
-* Purpose: Define exercises in a compact and quick-to-write format
-* Characteristics: No unnecessary metadata, reusable as template
-* Filling: Manual by user (teacher)
-2. Processing Algorithm (Python - System Core)
-* Input: Input JSON
-* Automated Processes:
-   * Solve integrals (exact and decimal solutions)
-   * Automatically detect coordinate system (cartesian/polar/cylindrical/spherical)
-   * Generate LaTeX code for formulas
-   * Calculate quantity type (Area/Volume/Mass)
-   * Add processing metadata
-* Output: Intermediate JSON (expanded with all calculated information)
-3. LaTeX Generator
-* Input: Intermediate JSON
-* Output: .tex file → Final PDF
-* Function: Apply visual formatting, decimal rounding only for presentation
-Data Flow
+# Math Solver - Automatic Math Exercise Generator
 
-Input JSON → main.py → Intermediate JSON → latex_generator.py → Final PDF
-Project File Structure
+Automated Python system for generating mathematical exercises with complete solutions. Processes simple exercise definitions and produces PDFs with professionally formatted solutions.
 
-math_solver/
-├─ data/
-│  ├─ input/     # Input JSONs (one per assignment)
-│  ├─ output/    # Generated PDFs
-│  └─ temp/      # Intermediate JSONs
-├─ src/
-│  ├─ main.py                    # Main orchestrator
-│  ├─ solvers/
-│  │  └─ integral_solver.py      # Solves integrals
-│  ├─ generators/
-│  │  └─ latex_generator.py      # Generates LaTeX and PDF
-│  ├─ models/
-│  │  └─ exercise.py             # Data models
-│  └─ utils/
-│     └─ file_handler.py         # JSON file handling
-Complex ID System and Auto-grouping
-ID Structure
-Input JSON uses separate fields for better clarity:
+## 🚀 Key Features
 
-json
+* **Automatic Resolution**: Solves integrals symbolically and numerically
+* **Intelligent Detection**: Automatically identifies coordinate systems (Cartesian, polar, cylindrical, spherical)
+* **Professional Format**: Generates LaTeX documents with academic formatting
+* **Modular Architecture**: Designed to expand to other types of exercises
+* **Batch Processing**: Handles multiple exercises in a single execution
+
+## 📋 Requirements
+
+* Python 3.9 or higher
+* SymPy (for symbolic computation)
+* LaTeX (optional, for PDF compilation)
+
+## 🛠️ Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/math-solver.git
+cd math-solver
+```
+
+2. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. (Optional) Install LaTeX for PDF compilation:
+   * **Windows**: MiKTeX
+   * **macOS**: MacTeX
+   * **Linux**: `sudo apt-get install texlive-full`
+
+## 💻 Usage
+
+### Basic Command
+
+```bash
+python src/main.py --input data/input/your_file.json
+```
+
+### Workflow
+
+1. **Create input file** in `data/input/` with exercises in JSON format
+2. **Run the processor** with the command above
+3. **Get results**:
+   * Intermediate JSON (extended) in `data/temp/`
+   * LaTeX file (.tex) in `data/output/`
+   * Compiled PDF (if LaTeX is installed)
+
+### Processing Pipeline
+
+```
+JSON Input → Python → Intermediate JSON → LaTeX Gen → .tex → PDF
+(manual)     (solve)    (extended)        (format)
+```
+
+### Example Input
+
+```json
 {
-  "id": "4",
-  "id_letter": null, 
-  "id_part": 1,
-  "type": "integral"
+  "metadata": {
+    "course": {
+      "name": "Calculus 3",
+      "subject_area": "calculus",
+      "level": 3
+    },
+    "assignment": {
+      "type": "HOMEWORK",
+      "number": 18,
+      "year": 2025,
+      "month": 6,
+      "iteration": 1
+    },
+    "output_settings": {
+      "units": "u",
+      "decimal_precision": 4,
+      "show_steps": false
+    }
+  },
+  "exercises": [
+    {
+      "id": "1",
+      "type": "integral",
+      "function": "x**2 + 3*y**2",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "1", "upper": "2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "2" }, "order": 2 }
+      ]
+    }
+  ]
 }
-Grouping Behavior
-* Intermediate JSON: Preserves ALL individual parts with complete traceability
-* LaTeX Generator: Groups parts for display (4p1 + 4p2 → shows as "4")
-* No ID generation: Intermediate JSON never creates combined IDs, maintains only original parts
-Individual Display Settings
-Settings Inheritance
-* Input JSON: Global defaults in output_settings
-* Intermediate JSON: Settings copied to each exercise as display_settings
-* Manual Override: Individual exercises can be customized in Intermediate JSON
-* LaTeX Generator: Reads individual display_settings per exercise
-System Execution
-Command Structure
+```
 
-bash
-python main.py --input data/input/[specific_file].json
-Processing Flow
-1. Verifies specified Input JSON exists
-2. Generates/overwrites Intermediate JSON (based on metadata iteration)
-3. Generates .tex file (PDF compilation pending for future version)
-Responsibilities by Module
-main.py (Orchestrator)
-* Load specified input JSON
-* Generate Intermediate JSON structure with expanded metadata
-* Coordinate processing of all exercises
-* Save Intermediate JSON with auto-generated filename
-* Call LaTeX generator
-integral_solver.py (Specific Solver)
-* Solve integrals mathematically (exact and decimal)
-* Detect coordinate system automatically
-* Determine quantity type (Area/Volume/Mass)
-* Generate mathematical LaTeX code
-* Calculate intermediate steps if required
-latex_generator.py (Final Generator)
-* Read Intermediate JSON
-* Group exercise parts for display (4p1+4p2 → "4")
-* Apply format configurations
-* Generate complete .tex file
-file_handler.py (Utilities)
-* Load/save JSONs with proper error handling
-* Generate filenames from metadata
-* Validate data structure
-* Handle Input/Intermediate JSON detection
-* Copy global display settings to individual exercises
+## 📁 Project Structure
 
+```
+math-solver/
+├── data/
+│   ├── input/          # Input JSONs
+│   ├── output/         # Generated PDFs
+│   └── temp/           # Intermediate JSONs
+├── src/
+│   ├── main.py         # Main orchestrator
+│   ├── solvers/        # Mathematical solvers
+│   ├── generators/     # LaTeX generators
+│   ├── models/         # Data models
+│   └── utils/          # Utilities
+├── docs/               # Extended documentation
+└── tests/              # Tests (pending)
+```
+
+## 🔧 Supported Exercise Types
+
+### Currently Implemented
+* ✅ **Integrals**: Single, double, triple in various coordinate systems
+
+### In Development
+* 🚧 Partial derivatives
+* 🚧 Directional derivatives
+* 🚧 Gradients
+* 🚧 Limits
+* 🚧 Series
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/NewType`)
+3. Commit your changes (`git commit -m 'Add new exercise type'`)
+4. Push to the branch (`git push origin feature/NewType`)
+5. Open a Pull Request
+
+### Adding New Exercise Type
+
+To add a new exercise type:
+1. Create a new solver in `src/solvers/`
+2. Extend the model in `src/models/exercise.py`
+3. Update `main.py` to handle the new type
+4. Add LaTeX formatting if necessary
+
+## 📝 License
+
+This project is under the MIT License - see the LICENSE file for more details.
+
+## 🙏 Acknowledgments
+
+* SymPy for the symbolic computation engine
+* The Python community for incredible tools
+
+## 📧 Contact
+
+For questions or suggestions, please open an issue on GitHub.
+
+# === PROJECT STRUCTURE (in development)===
+# math_solver/
+# ├── data/
+# │   ├── input/     # Input JSONs (one per assignment)
+# │   ├── output/    # Generated PDFs
+# │   └── temp/      # Intermediate JSONs
+# ├── src/
+# │   ├── main.py                    # Main orchestrator
+# │   ├── solvers/
+# │   │   └── integral_solver.py     # Solves integrals
+# │   ├── generators/
+# │   │   └── latex_generator.py     # Generates LaTeX and PDF
+# │   ├── models/
+# │   │   └── exercise.py            # Data models
+# │   └── utils/
+# │       └── file_handler.py         # JSON file handling
