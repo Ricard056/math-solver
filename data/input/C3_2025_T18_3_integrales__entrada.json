@@ -1,0 +1,144 @@
+{
+  "metadata": {
+    "course": {
+      "name": "Calculo 3",
+      "subject_area": "calculo",
+      "level": 3
+    },
+    "assignment": {
+      "type": "TAREA",
+      "number": 18,
+      "year": 2025,
+      "month": 6,
+      "iteration": 1
+    },
+    "output_settings": {
+      "units": "u",
+      "decimal_precision": 4,
+      "show_steps": false,
+      "equation_format": {
+        "show_quantity_label": true,
+        "show_equation": true
+      }
+    }
+  },
+  "exercises": [
+    {
+      "id": "1",      "id_letter": null,      "id_part": null,
+      "type": "integral",
+      "function": "x**2 + 3*y**2",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "1", "upper": "2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "2",      "id_letter": null,      "id_part": null,
+      "type": "integral",
+      "function": "6 - 2*x - 3*y",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "1/2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "3/2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "3",      "id_letter": null,      "id_part": null,
+      "type": "integral",
+      "function": "r",
+      "integrals": [
+        { "var": "z", "limits": { "lower": "0", "upper": "6 - 2*r*cos(theta) - 3*r*sin(theta)" }, "order": 1 },
+        { "var": "r", "limits": { "lower": "0", "upper": "1" }, "order": 2 },
+        { "var": "theta", "limits": { "lower": "0", "upper": "2*pi" }, "order": 3 }
+      ]
+    },
+    {
+      "id": "4",      "id_letter": null,      "id_part": 1,
+      "type": "integral",
+      "function": "2*r",
+      "integrals": [
+        { "var": "r", "limits": { "lower": "0", "upper": "5*sin(theta)" }, "order": 1 },
+        { "var": "theta", "limits": { "lower": "0", "upper": "pi/6" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "4",      "id_letter": null,      "id_part": 2,
+      "type": "integral",
+      "function": "3*r^2",
+      "integrals": [
+        { "var": "r", "limits": { "lower": "0", "upper": "2*cos(theta)" }, "order": 1 },
+        { "var": "theta", "limits": { "lower": "0", "upper": "pi/4" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "5",      "id_letter": "a",      "id_part": 1,
+      "type": "integral",
+      "function": "x*y",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "1" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "5",      "id_letter": "a",      "id_part": 2,
+      "type": "integral",
+      "function": "2*x*y",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "1", "upper": "2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "5",      "id_letter": "b",      "id_part": null,
+      "type": "integral",
+      "function": "x**2",
+      "integrals": [
+        { "var": "x", "limits": { "lower": "0", "upper": "3" }, "order": 1 }
+      ]
+    },
+    {
+      "id": "6",      "id_letter": null,      "id_part": 1,
+      "type": "integral",
+      "function": "sin(x)*cos(y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "pi/2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "pi" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "6",      "id_letter": null,      "id_part": 2,
+      "type": "integral",
+      "function": "cos(x)*sin(y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "pi/2", "upper": "pi" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "pi/2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "6",      "id_letter": null,      "id_part": 3,
+      "type": "integral",
+      "function": "sin(x)*sin(y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "pi/4" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "pi/4", "upper": "pi/2" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "7",      "id_letter": "a",      "id_part": null,
+      "type": "integral",
+      "function": "x*cos(y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "x**2" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 2 }
+      ]
+    },
+    {
+      "id": "7",      "id_letter": "b",      "id_part": null,
+      "type": "integral",
+      "function": "exp(x + y)",
+      "integrals": [
+        { "var": "y", "limits": { "lower": "0", "upper": "x" }, "order": 1 },
+        { "var": "x", "limits": { "lower": "0", "upper": "1" }, "order": 2 }
+      ]
+    }
+  ]
+}

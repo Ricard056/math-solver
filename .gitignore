@@ -1,5 +1,5 @@
 # Python
-__pycache__/
+**pycache**/
 *.py[cod]
 *$py.class
 *.so
@@ -43,6 +43,20 @@ MANIFEST
 data/output/
 data/temp/
 *.pdf
+
+# Archivos temporales específicos
+data/temp/*.json
+data/output/*.tex
+data/output/*.pdf
+
+# Documentación auxiliar no validada
+docs/Helpful/
+
+# Archivos de flujo de trabajo personal
+GitWorkflow.md
+
+# Borradores de entrada
+data/input/drafts/
 
 # Sistema
 .DS_Store

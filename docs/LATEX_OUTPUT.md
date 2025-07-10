@@ -1,0 +1,566 @@
+# LaTeX Output Documentation
+
+## Overview
+
+Math Solver generates professional LaTeX documents from processed exercise data. This document explains the LaTeX file structure, formatting rules, and customization options.
+
+## LaTeX Document Structure
+
+### Basic Structure
+
+```latex
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{lmodern}
+\geometry{letterpaper, margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{TAREA 18}
+\lhead{Solucionario}
+\cfoot{\thepage}
+\setlength{\droptitle}{-4em}
+\title{\textbf{TAREA 18 \\[0.5em] \large Solucionario}}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+\section*{Resultados}
+\everymath{\displaystyle}
+\setlength{\jot}{10pt}
+\begin{enumerate}
+    % Exercise items here
+\end{enumerate}
+\end{document}
+```
+
+### Document Components
+
+#### 1. Preamble
+- Document class: 12pt article
+- UTF-8 encoding for international characters
+- Mathematical packages (amsmath)
+- Page geometry and headers
+
+#### 2. Title Section
+- Assignment type and number
+- "Solucionario" (Solution Set) subtitle
+- No author or date by default
+
+#### 3. Results Section
+- Unnumbered section
+- Display style math throughout
+- Enumerated list of exercises
+
+## Exercise Formatting
+
+### Simple Exercise
+
+**Input Data:**
+```json
+{
+  "id": "1",
+  "solution": {
+    "exact": "50/3",
+    "decimal": 16.6667,
+    "quantity_type": "Volume",
+    "units": "u^3"
+  }
+}
+```
+
+**LaTeX Output:**
+```latex
+\item 
+\begin{itemize}
+    \item[] V = $\int_{0}^{2} \int_{1}^{2} x^2 + 3 y^2 \, dy dx = \dfrac{50}{3} = 16.6667 \ \text{u}^{3}$
+\end{itemize}
+```
+
+### Exercise with Sub-items
+
+**Input Data:**
+```json
+[
+  {"id": "5", "id_letter": "a", ...},
+  {"id": "5", "id_letter": "b", ...}
+]
+```
+
+**LaTeX Output:**
+```latex
+\item 
+\begin{itemize}
+    \item[a)] V = $\int_{0}^{2} \int_{0}^{1} x y \, dy dx = 1 = 1.0000 \ \text{u}^{3}$
+    \item[b)] A = $\int_{0}^{3} x^2 \, dx = 9 = 9.0000 \ \text{u}^{2}$
+\end{itemize}
+```
+
+### Summed Parts
+
+**Input Data:**
+```json
+[
+  {"id": "4", "id_part": 1, "solution": {"decimal": 1.1323}},
+  {"id": "4", "id_part": 2, "solution": {"decimal": 4.7140}}
+]
+```
+
+**LaTeX Output:**
+```latex
+\item 
+\begin{itemize}
+    \item[] V = $1.1323 + 4.7140 = 5.8464 \ \text{u}^{3}$
+\end{itemize}
+```
+
+## Mathematical Formatting
+
+### Integral Notation
+
+The system formats integrals with proper spacing and ordering:
+
+```latex
+% Single integral
+\int_{a}^{b} f(x) \, dx
+
+% Double integral
+\int_{c}^{d} \int_{a}^{b} f(x,y) \, dy dx
+
+% Triple integral
+\int_{e}^{f} \int_{c}^{d} \int_{a}^{b} f(x,y,z) \, dz dy dx
+```
+
+### Symbol Conversions
+
+| Input | LaTeX Output |
+|-------|--------------|
+| sin(x) | \sin(x) |
+| cos(x) | \cos(x) |
+| exp(x) | e^{x} |
+| sqrt(x) | \sqrt{x} |
+| pi | \pi |
+| theta | \theta |
+| phi | \phi |
+| rho | \rho |
+
+### Fraction Formatting
+
+Fractions use `\dfrac` for display style:
+
+```latex
+% Input: "1/2"
+\dfrac{1}{2}
+
+% Input: "cos(1)/2"
+\dfrac{\cos(1)}{2}
+
+% Input: "-e + 1/2 + exp(2)/2"
+-e + \dfrac{1}{2} + \dfrac{e^{2}}{2}
+```
+
+### Unit Formatting
+
+Units are wrapped in `\text{}` with proper exponents:
+
+```latex
+\text{u}        % Base unit
+\text{u}^{2}    % Square units
+\text{u}^{3}    % Cubic units
+\text{m}^{3}    % Custom base unit
+```
+
+## Quantity Labels
+
+Based on the detected quantity type:
+
+| Quantity Type | Label | Example |
+|---------------|-------|---------|
+| Length | L | L = ... |
+| Area | A | A = ... |
+| Volume | V | V = ... |
+| Mass | M | M = ... |
+
+## Configuration Effects
+
+### decimal_precision
+
+Controls decimal places in results:
+
+```latex
+% precision: 2
+= 16.67 \ \text{u}^{3}
+
+% precision: 4
+= 16.6667 \ \text{u}^{3}
+
+% precision: 6
+= 16.666667 \ \text{u}^{3}
+```
+
+### show_quantity_label
+
+```latex
+% true (default)
+V = \int ... = result
+
+% false
+\int ... = result
+```
+
+### show_equation
+
+```latex
+% true (default)
+V = \int_{0}^{1} x^2 \, dx = \dfrac{1}{3} = 0.3333
+
+% false
+V = 0.3333
+```
+
+### units
+
+Propagates to all results:
+
+```latex
+% units: "m"
+= 5.2456 \ \text{m}^{3}
+
+% units: "cm"  
+= 5.2456 \ \text{cm}^{3}
+```
+
+## PDF Customization
+
+### Page Layout
+
+Current settings:
+- Paper: Letter size
+- Margins: 1 inch all sides
+- Font: Latin Modern (lmodern)
+- Font size: 12pt
+
+To customize, modify the geometry package:
+```latex
+\geometry{a4paper, margin=2cm}  % A4 with 2cm margins
+\geometry{letterpaper, left=1.5in, right=1in}  % Custom margins
+```
+
+### Headers and Footers
+
+Current configuration:
+- Right header: Assignment name
+- Left header: "Solucionario"
+- Center footer: Page number
+
+Customization:
+```latex
+\rhead{Course Name - Assignment}
+\lhead{Student Name}
+\chead{Date}
+\rfoot{Page \thepage\ of \pageref{LastPage}}
+```
+
+### Title Customization
+
+To modify the title format:
+```latex
+\title{\textbf{\huge HOMEWORK 18} \\[1em] 
+       \Large Solutions Manual \\[0.5em]
+       \normalsize Multivariable Calculus}
+\author{Generated by Math Solver}
+\date{\today}
+```
+
+### Math Display Settings
+
+Control math formatting:
+```latex
+% Spacing between equations
+\setlength{\jot}{15pt}  % Default: 10pt
+
+% Inline vs display math
+\everymath{\displaystyle}  % Force display style
+\everymath{\textstyle}     % Force text style
+
+% Custom spacing in integrals
+\, % Thin space (default)
+\: % Medium space
+\; % Thick space
+```
+
+## Special Cases
+
+### Empty or Failed Exercises
+
+When an exercise fails to process:
+```latex
+\item 
+\begin{itemize}
+    \item[] N/A
+\end{itemize}
+```
+
+### Very Long Expressions
+
+Long expressions are automatically broken:
+```latex
+\begin{align}
+    V &= \int_{0}^{2\pi} \int_{0}^{1} \int_{0}^{6 - 2r\cos(\theta) - 3r\sin(\theta)} \\
+      &\qquad r \, dz dr d\theta \\
+      &= 6\pi = 18.8496 \ \text{u}^{3}
+\end{align}
+```
+
+### Special Characters
+
+The system handles special characters:
+- Greek letters converted automatically
+- Mathematical symbols preserved
+- Spaces in expressions managed
+
+## Complete Example
+
+### Input Assignment Metadata
+```json
+{
+  "course": {"name": "Calculus 3", "level": 3},
+  "assignment": {"type": "EXAM", "number": 5},
+  "output_settings": {
+    "units": "cm",
+    "decimal_precision": 3,
+    "show_quantity_label": true
+  }
+}
+```
+
+### Generated LaTeX
+```latex
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{lmodern}
+\geometry{letterpaper, margin=1in}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{EXAM 5}
+\lhead{Solucionario}
+\cfoot{\thepage}
+\setlength{\droptitle}{-4em}
+\title{\textbf{EXAM 5 \\[0.5em] \large Solucionario}}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+\section*{Resultados}
+\everymath{\displaystyle}
+\setlength{\jot}{10pt}
+\begin{enumerate}
+    \item 
+    \begin{itemize}
+        \item[] V = $\int_{0}^{2} \int_{0}^{1} \int_{0}^{z} xyz \, dx dy dz = \dfrac{4}{3} = 1.333 \ \text{cm}^{3}$
+    \end{itemize}
+    
+    \item 
+    \begin{itemize}
+        \item[a)] A = $\int_{0}^{\pi} \int_{0}^{1} r \, dr d\theta = \dfrac{\pi}{2} = 1.571 \ \text{cm}^{2}$
+        \item[b)] V = $\int_{0}^{2\pi} \int_{0}^{1} r^2 \, dr d\theta = \dfrac{2\pi}{3} = 2.094 \ \text{cm}^{3}$
+    \end{itemize}
+\end{enumerate}
+\end{document}
+```
+
+## Compilation Process
+
+### PDF Generation
+
+The system uses `pdflatex` for compilation:
+
+```bash
+pdflatex -interaction=nonstopmode filename.tex
+```
+
+Options:
+- `-interaction=nonstopmode`: Continue on errors
+- `-output-directory=path`: Specify output location
+- `-jobname=name`: Custom output filename
+
+### Error Handling
+
+Common LaTeX errors and solutions:
+
+1. **Missing packages**
+   ```
+   ! LaTeX Error: File `amsmath.sty' not found.
+   ```
+   Solution: Install full LaTeX distribution
+
+2. **Unicode errors**
+   ```
+   ! Package inputenc Error: Unicode char α (U+03B1)
+   ```
+   Solution: Ensure UTF-8 encoding is set
+
+3. **Math mode errors**
+   ```
+   ! Missing $ inserted.
+   ```
+   Solution: Check proper math mode delimiters
+
+## Advanced Customization
+
+### Custom Templates
+
+Create custom LaTeX templates by modifying:
+
+1. **Document class options**
+   ```latex
+   \documentclass[11pt,twocolumn]{article}
+   \documentclass[a4paper,landscape]{article}
+   ```
+
+2. **Additional packages**
+   ```latex
+   \usepackage{color}
+   \usepackage{graphicx}
+   \usepackage{hyperref}
+   ```
+
+3. **Custom commands**
+   ```latex
+   \newcommand{\integral}[4]{\int_{#1}^{#2} #3 \, d#4}
+   \newcommand{\vect}[1]{\mathbf{#1}}
+   ```
+
+### Styling Options
+
+1. **Color coding**
+   ```latex
+   \usepackage{xcolor}
+   \definecolor{solution}{RGB}{0,100,0}
+   {\color{solution} V = 5.234 \ \text{cm}^{3}}
+   ```
+
+2. **Boxes and frames**
+   ```latex
+   \usepackage{tcolorbox}
+   \begin{tcolorbox}[colback=gray!10]
+       Solution: $V = 5.234 \ \text{cm}^{3}$
+   \end{tcolorbox}
+   ```
+
+3. **Custom fonts**
+   ```latex
+   \usepackage{palatino}  % Palatino font
+   \usepackage{fourier}   % Fourier font
+   ```
+
+### Multi-language Support
+
+For non-English documents:
+
+```latex
+\usepackage[spanish]{babel}
+\title{\textbf{TAREA 18 \\[0.5em] \large Solucionario}}
+
+% Or for other languages
+\usepackage[french]{babel}
+\usepackage[german]{babel}
+```
+
+## Output File Naming
+
+Files follow the pattern:
+```
+C{level}_{year}_{type}{number}_integrales_v{iteration}.{ext}
+```
+
+Examples:
+- `C3_2025_T18_integrales_v1.tex`
+- `C3_2025_E5_integrales_v2.tex`
+- `C3_2025_P10_integrales_v1.tex`
+
+Where:
+- C = Course
+- T = Tarea (Homework)
+- E = Examen (Exam)
+- P = Práctica (Practice)
+
+## Best Practices
+
+### 1. Mathematical Notation
+- Use display math for complex expressions
+- Align multi-line equations properly
+- Include units in all final answers
+
+### 2. Document Organization
+- Group related exercises
+- Use consistent labeling
+- Maintain clear hierarchy
+
+### 3. Readability
+- Adequate spacing between items
+- Clear quantity labels
+- Proper number formatting
+
+### 4. Professional Appearance
+- Clean title formatting
+- Consistent headers/footers
+- Appropriate margins
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Long equations overflow**
+   - Use `align` environment
+   - Break at operator positions
+   - Adjust margins if needed
+
+2. **Special characters not rendering**
+   - Check UTF-8 encoding
+   - Use LaTeX commands for symbols
+   - Verify font support
+
+3. **Compilation timeouts**
+   - Simplify complex expressions
+   - Check for infinite loops
+   - Increase timeout limit
+
+### Debug Mode
+
+To debug LaTeX generation:
+
+1. Keep intermediate `.tex` file
+2. Compile manually to see errors
+3. Check `.log` file for details
+
+## Future Enhancements
+
+Planned improvements:
+
+1. **Step-by-step solutions**
+   ```latex
+   \begin{align}
+   V &= \int_{0}^{1} x^2 \, dx \\
+     &= \left[ \frac{x^3}{3} \right]_{0}^{1} \\
+     &= \frac{1}{3} - 0 \\
+     &= \frac{1}{3}
+   \end{align}
+   ```
+
+2. **Graphical representations**
+   - Integration regions
+   - 3D surfaces
+   - Solution visualization
+
+3. **Multiple output formats**
+   - Beamer presentations
+   - HTML with MathJax
+   - Markdown with LaTeX
